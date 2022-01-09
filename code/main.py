@@ -12,10 +12,10 @@ app = Flask(__name__)
 @app.route("/certificate")
 def get_certificate():
     # remove pki folder if existing
-    command_1 = "rm -rf {}/cloud-sec-ca/easy_rsa/pki".format(home)
+    # command_1 = "rm -rf {}/cloud-sec-ca/easy_rsa/pki".format(home)
     command_2 = "{}/cloud-sec-ca/easy_rsa/easyrsa init-pki".format(home)
     command_3 = "{}/cloud-sec-ca/easy_rsa/easyrsa build-ca nopass".format(home)
-    command = "{0} && {1} && {2}".format(command_1, command_2, command_3)
+    command = "{0} && {1}".format(command_2, command_3)
     process = subprocess.run(command, capture_output=True, shell=True)
 
     """
