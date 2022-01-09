@@ -37,7 +37,7 @@ def get_certificate():
         universal_newlines=True,
     )
     s3_client.upload_file(
-        "{}/cloud-sec-ca/easy_rsa/pki/ca.crt",
+        "{}/cloud-sec-ca/easy_rsa/pki/ca.crt".format(home),
         "7342c6f2-8",
         "ca_{}.crt".format(str(datetime.now())),
     )
