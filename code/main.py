@@ -3,6 +3,7 @@ import subprocess
 from os.path import expanduser
 import boto3
 from datetime import datetime
+import time
 
 home = expanduser("~")
 s3_client = boto3.client("s3")
@@ -17,7 +18,9 @@ def get_certificate():
     command_3 = "{}/cloud-sec-ca/easy_rsa/easyrsa build-ca nopass".format(home)
     command = "{0} && {1}".format(command_2, command_3)
     process = subprocess.run(command, capture_output=True, shell=True)
-
+    while not process.stdout:
+        print("In progress..")
+        time.sleep(1)
     """
     process = subprocess.run(
         ["rm", "-rf", "{}/cloud-sec-ca/easy_rsa/pki".format(home)],
