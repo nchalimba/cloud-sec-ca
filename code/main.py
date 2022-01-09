@@ -22,7 +22,7 @@ def get_certificate():
 
     process = subprocess.run(
         [
-            "{}/cloud-sec-ca/easy-rsa".format(home),
+            "{}/cloud-sec-ca/easy_rsa".format(home),
             "init-pki",
         ],
         stdout=subprocess.PIPE,
@@ -32,7 +32,7 @@ def get_certificate():
         return "INTERNAL_SERVER_ERROR", 500
 
     process = subprocess.run(
-        ["{}/cloud-sec-ca/easy-rsa".format(home), "build-ca", "nopass"],
+        ["{}/cloud-sec-ca/easy_rsa".format(home), "build-ca", "nopass"],
         stdout=subprocess.PIPE,
         universal_newlines=True,
     )
