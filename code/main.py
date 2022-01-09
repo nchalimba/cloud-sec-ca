@@ -4,9 +4,16 @@ from os.path import expanduser
 import boto3
 from datetime import datetime
 import time
+import os
 
 home = expanduser("~")
-s3_client = boto3.client("s3")
+ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+# s3_client = boto3.client("s3")
+s3_client = boto3.resource(
+    "s3", aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=SECRET_ACCESS_KEY
+)
+
 app = Flask(__name__)
 
 
@@ -51,7 +58,7 @@ def get_certificate():
     if process.returncode != 0:
         return "INTERNAL_SERVER_ERROR", 500
     print("uploading file")
-    s3_client.upload_file(
+    s3_client.meta.client.upload_file(
         "{}/cloud-sec-ca/easy_rsa/pki/ca.crt".format(home),
         "7342c6f2-8",
         "ca_{}.crt".format(str(datetime.now())),
