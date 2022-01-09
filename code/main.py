@@ -18,7 +18,7 @@ def get_certificate():
     command_3 = "{}/cloud-sec-ca/easy_rsa/easyrsa build-ca nopass".format(home)
     command = "{0} && {1}".format(command_2, command_3)
     process = subprocess.run(command, capture_output=True, shell=True)
-    while not process.stdout:
+    while not process:
         print("In progress..")
         time.sleep(1)
     """
@@ -47,10 +47,10 @@ def get_certificate():
         universal_newlines=True,
     )
     """
-
+    print(process)
     if process.returncode != 0:
         return "INTERNAL_SERVER_ERROR", 500
-
+    print("uploading file")
     s3_client.upload_file(
         "{}/cloud-sec-ca/easy_rsa/pki/ca.crt".format(home),
         "7342c6f2-8",
