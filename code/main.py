@@ -24,10 +24,10 @@ def get_certificate():
     command_2 = "{}/cloud-sec-ca/easy_rsa/easyrsa init-pki".format(home)
     command_3 = "{}/cloud-sec-ca/easy_rsa/easyrsa build-ca nopass".format(home)
     command = "{0} && {1}".format(command_2, command_3)
-    process = subprocess.run(command, capture_output=True, shell=True)
-    while not process:
-        print("In progress..")
-        time.sleep(1)
+    stream = os.popen(command)
+    output = stream.read()
+    # process = subprocess.run(command, capture_output=True, shell=True)
+
     """
     process = subprocess.run(
         ["rm", "-rf", "{}/cloud-sec-ca/easy_rsa/pki".format(home)],
@@ -54,12 +54,19 @@ def get_certificate():
         universal_newlines=True,
     )
     """
-    print(process)
-    while not os.path.exists("{}/cloud-sec-ca/easy_rsa/pki/ca.crt".format(home)):
+    print(output)
+    timeout = 5
+    counter = 0
+    while (
+        not os.path.exists("{}/cloud-sec-ca/easy_rsa/pki/ca.crt".format(home))
+        and counter < timeout
+    ):
         print("ca creation in progress...")
         time.sleep(1)
-    if process.returncode != 0:
-        return "INTERNAL_SERVER_ERROR", 500
+        counter += 1
+
+    # if process.returncode != 0:
+    #   return "INTERNAL_SERVER_ERROR", 500
     print("uploading file")
     s3_client.meta.client.upload_file(
         "{}/cloud-sec-ca/easy_rsa/pki/ca.crt".format(home),
