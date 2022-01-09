@@ -11,11 +11,9 @@ app = Flask(__name__)
 
 @app.route("/certificate")
 def get_certificate():
+    # remove pki folder if existing
     process = subprocess.run(
-        [
-            "touch",
-            home + "/Documents/cis/cis21-assignment8/server/sample.txt",
-        ],
+        ["rm", "-rf", "{}/cloud-sec-ca/easy_rsa/pki".format(home)],
         stdout=subprocess.PIPE,
         universal_newlines=True,
     )
@@ -24,15 +22,24 @@ def get_certificate():
 
     process = subprocess.run(
         [
-            "ls",
-            home + "/Documents/cis/cis21-assignment8/server/",
+            "{}/cloud-sec-ca/easy-rsa".format(home),
+            "init-pki",
         ],
         stdout=subprocess.PIPE,
         universal_newlines=True,
     )
-    print(process.stdout)
+    if process.returncode != 0:
+        return "INTERNAL_SERVER_ERROR", 500
+
+    process = subprocess.run(
+        ["{}/cloud-sec-ca/easy-rsa".format(home), "build-ca", "nopass"],
+        stdout=subprocess.PIPE,
+        universal_newlines=True,
+    )
     s3_client.upload_file(
-        "sample.txt", "7342c6f2-8", "sample_{}.txt".format(str(datetime.now()))
+        "{}/cloud-sec-ca/easy_rsa/pki/ca.crt",
+        "7342c6f2-8",
+        "ca_{}.crt".format(str(datetime.now())),
     )
     return "OK"
 
