@@ -54,6 +54,7 @@ def get_certificate():
         universal_newlines=True,
     )
     """
+    time.sleep(3)
     print(process)
     if process.returncode != 0:
         return "INTERNAL_SERVER_ERROR", 500
