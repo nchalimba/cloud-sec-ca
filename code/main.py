@@ -54,8 +54,10 @@ def get_certificate():
         universal_newlines=True,
     )
     """
-    time.sleep(3)
     print(process)
+    while not os.path.exists("{}/cloud-sec-ca/easy_rsa/pki/ca.crt".format(home)):
+        print("ca creation in progress...")
+        time.sleep(1)
     if process.returncode != 0:
         return "INTERNAL_SERVER_ERROR", 500
     print("uploading file")
