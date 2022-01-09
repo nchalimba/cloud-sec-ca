@@ -12,6 +12,13 @@ app = Flask(__name__)
 @app.route("/certificate")
 def get_certificate():
     # remove pki folder if existing
+    command_1 = "rm -rf {}/cloud-sec-ca/easy_rsa/pki".format(home)
+    command_2 = "{}/cloud-sec-ca/easy_rsa/easyrsa init-pki".format(home)
+    command_3 = "{}/cloud-sec-ca/easy_rsa/easyrsa build-ca nopass".format(home)
+    command = "{0} && {1} && {2}".format(command_1, command_2, command_3)
+    process = subprocess.run(command, capture_output=True, shell=True)
+
+    """
     process = subprocess.run(
         ["rm", "-rf", "{}/cloud-sec-ca/easy_rsa/pki".format(home)],
         stdout=subprocess.PIPE,
@@ -36,6 +43,11 @@ def get_certificate():
         stdout=subprocess.PIPE,
         universal_newlines=True,
     )
+    """
+
+    if process.returncode != 0:
+        return "INTERNAL_SERVER_ERROR", 500
+
     s3_client.upload_file(
         "{}/cloud-sec-ca/easy_rsa/pki/ca.crt".format(home),
         "7342c6f2-8",
