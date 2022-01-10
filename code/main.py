@@ -24,6 +24,7 @@ def get_certificate():
     command_2 = "{}/cloud-sec-ca/easy_rsa/easyrsa init-pki".format(home)
     command_3 = "{}/cloud-sec-ca/easy_rsa/easyrsa build-ca nopass".format(home)
     command = "{0} && {1}".format(command_2, command_3)
+    print("Command: {}".format(command))
     stream = os.popen(command)
     output = stream.read()
     # process = subprocess.run(command, capture_output=True, shell=True)
