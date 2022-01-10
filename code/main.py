@@ -19,6 +19,7 @@ app = Flask(__name__)
 
 @app.route("/certificate")
 def get_certificate():
+    target_pki_folder = "{}/pki".format(os.getcwd())
     # remove pki folder if existing
     # command_1 = "rm -rf {}/cloud-sec-ca/easy_rsa/pki".format(home)
     command_2 = "{}/cloud-sec-ca/easy_rsa/easyrsa init-pki".format(home)
@@ -59,8 +60,7 @@ def get_certificate():
     timeout = 5
     counter = 0
     while (
-        not os.path.exists("{}/cloud-sec-ca/easy_rsa/pki/ca.crt".format(home))
-        and counter < timeout
+        not os.path.exists("{}/ca.crt".format(target_pki_folder)) and counter < timeout
     ):
         print("ca creation in progress...")
         time.sleep(1)
@@ -70,7 +70,7 @@ def get_certificate():
     #   return "INTERNAL_SERVER_ERROR", 500
     print("uploading file")
     s3_client.meta.client.upload_file(
-        "{}/cloud-sec-ca/easy_rsa/pki/ca.crt".format(home),
+        "{}/ca.crt".format(target_pki_folder),
         "7342c6f2-8",
         "ca_{}.crt".format(str(datetime.now())),
     )
