@@ -20,7 +20,7 @@ def main():
         response = s3_client.list_objects_v2(Bucket="7342c6f2-8", Prefix=prefix)
         objects = response.get("Contents", None)
         if objects and len(objects) > 0:
-            objects.sort(key=lambda x: x["LastModified"])
+            objects.sort(key=lambda x: x["LastModified"], reverse=True)
             print(objects)
 
 
