@@ -11,13 +11,17 @@ SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 s3_client = boto3.client(
     "s3", aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=SECRET_ACCESS_KEY
 )
+s3_resource = boto3.resource(
+    "s3", aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=SECRET_ACCESS_KEY
+)
+bucket_name = "7342c6f2-8"
 prefix = "input"
 
 
 def main():
     while True:
         time.sleep(10)
-        response = s3_client.list_objects_v2(Bucket="7342c6f2-8", Prefix=prefix)
+        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
         objects = response.get("Contents", None)
 
         if not objects or len(objects) == 0:
@@ -34,7 +38,7 @@ def main():
                 continue
             group_name = filename_split[1]
             create_certificate(group_name, filename)
-            move_file(filename)
+            move_file(file_key)
 
 
 def get_filename_from_key(key: str) -> str:
@@ -44,7 +48,7 @@ def get_filename_from_key(key: str) -> str:
 
 
 def create_certificate(group_name: str, filename: str):
-    target_pki_folder = "{}/pki".format(os.getcwd())
+    target_pki_folder = "{}/pki/issued".format(os.getcwd())
     command1 = 'echo "{0}" | {1}/cloud-sec-ca/easy_rsa/easyrsa init-pki'.format(
         "yes", home
     )
@@ -66,17 +70,28 @@ def create_certificate(group_name: str, filename: str):
         command1, command2, command3, command4
     )
     print("Command: {}".format(total_command))
-    stream = os.popen(command)
+    stream = os.popen(total_command)
     output = stream.read()
     print(output)
 
     # TODO: upload crt
+    print("Uploading file")
     folder = "certificates"
-    pass
+    with open("{0}/{1}.crt".format(target_pki_folder, filename), "rb") as data:
+        s3_client.upload_fileobj(
+            data, bucket_name, "{0}/{1}.crt".format(folder, filename)
+        )
 
 
-def move_file(filename: str):
+def move_file(file_key: str):
     folder = "done"
+    file_key_split = file_key.split("/")
+    file_key_split[0] = folder
+    new_file_key = "/".join(file_key_split)
+    s3_resource.Object(bucket_name, new_file_key).copy_from(
+        CopySource="{0}/{1}".format(bucket_name, file_key)
+    )
+    s3_resource.Object(bucket_name, file_key).delete()
 
 
 if __name__ == "__main__":
