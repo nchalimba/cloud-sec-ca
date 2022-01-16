@@ -24,7 +24,8 @@ def main():
         response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
         objects = response.get("Contents", None)
 
-        if not objects or len(objects) == 0:
+        if not objects or len(objects) <= 1:
+            print("No files found in bucket")
             continue
 
         objects.sort(key=lambda x: x["LastModified"])  # oldest first
@@ -39,6 +40,7 @@ def main():
             group_name = filename_split[1]
             create_certificate(group_name, filename)
             move_file(file_key)
+            print("File was processed successfully")
 
 
 def get_filename_from_key(key: str) -> str:
@@ -48,6 +50,7 @@ def get_filename_from_key(key: str) -> str:
 
 
 def create_certificate(group_name: str, filename: str):
+    print("Creating a certificate...")
     target_pki_folder = "{}/pki/issued".format(os.getcwd())
     command1 = 'echo "{0}" | {1}/cloud-sec-ca/easy_rsa/easyrsa init-pki'.format(
         "yes", home
@@ -75,15 +78,17 @@ def create_certificate(group_name: str, filename: str):
     print(output)
 
     # TODO: upload crt
-    print("Uploading file")
+    print("Uploading certificate")
     folder = "certificates"
     with open("{0}/{1}.crt".format(target_pki_folder, filename), "rb") as data:
         s3_client.upload_fileobj(
             data, bucket_name, "{0}/{1}.crt".format(folder, filename)
         )
+        print("Certificate upload succeeded")
 
 
 def move_file(file_key: str):
+    print("Moving request file to done")
     folder = "done"
     file_key_split = file_key.split("/")
     file_key_split[0] = folder
